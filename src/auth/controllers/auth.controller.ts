@@ -18,7 +18,13 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
-import { RegisterDto, LoginDto, AuthResponseDto } from '../dto';
+import {
+  RegisterDto,
+  LoginDto,
+  AuthResponseDto,
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
+} from '../dto';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { CurrentUser, CurrentUserData, Roles } from '../decorators';
 import { UserRole } from '../../../generated/prisma';
@@ -133,6 +139,87 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     return this.authService.login(loginDto);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @ApiOperation({
+    summary: 'Обновить access токен',
+    description:
+      'Обновляет истекший access токен с помощью refresh токена. Refresh токен должен быть валидным и не отозванным.',
+  })
+  @ApiBody({
+    type: RefreshTokenDto,
+    description: 'Refresh токен для обновления access токена',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Токены успешно обновлены',
+    type: RefreshTokenResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Невалидный или истекший refresh токен',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: {
+          type: 'string',
+          example: 'Invalid or expired refresh token',
+        },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Некорректные данные запроса',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['Refresh токен обязателен для заполнения'],
+        },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
+  })
+  async refreshTokens(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<RefreshTokenResponseDto> {
+    return this.authService.refreshTokens(refreshTokenDto);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Выход из системы',
+    description:
+      'Отзывает все активные refresh токены пользователя. Требует валидный JWT токен в заголовке Authorization.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Успешный выход из системы',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Successfully logged out' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - отсутствует или невалидный JWT токен',
+  })
+  async logout(@CurrentUser() user: CurrentUserData) {
+    return this.authService.logout(user.id);
   }
 
   @Get('profile')

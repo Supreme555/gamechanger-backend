@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { DealsService } from '../services/deals.service';
 import {
@@ -18,6 +19,7 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   DealListResponseDto,
@@ -29,9 +31,15 @@ import {
   UpdateDealResponseDto,
   DeleteDealResponseDto,
 } from '../dto/index';
+import { JwtAuthGuard, RolesGuard } from '../../../auth/guards';
+import { Roles } from '../../../auth/decorators';
+import { UserRole } from '../../../../generated/prisma';
 
 @ApiTags('bitrix24')
 @Controller('bitrix24/deals')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('user' as UserRole, 'admin' as UserRole, 'manager' as UserRole)
+@ApiBearerAuth()
 export class DealsController {
   constructor(private readonly dealsService: DealsService) {}
 
@@ -47,6 +55,10 @@ export class DealsController {
     status: 200,
     description: 'Список сделок успешно получен',
     type: DealListResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
   })
   getDeals(@Query('start') start?: string): Promise<DealListResponseDto> {
     const offset = Number.isFinite(Number(start)) ? Number(start) : 0;
@@ -67,6 +79,14 @@ export class DealsController {
   @ApiResponse({
     status: 400,
     description: 'Некорректные данные для создания сделки',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
   })
   createDeal(
     @Body() createDealDto: CreateDealDto,
@@ -89,6 +109,14 @@ export class DealsController {
   @ApiResponse({
     status: 404,
     description: 'Сделка не найдена',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
   })
   getDealById(@Param('id', ParseIntPipe) id: number): Promise<DealDetailsDto> {
     return this.dealsService.getDealById(id);
@@ -113,6 +141,14 @@ export class DealsController {
   @ApiResponse({
     status: 404,
     description: 'Сделка не найдена',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
   })
   updateDeal(
     @Param('id', ParseIntPipe) id: number,
@@ -141,6 +177,14 @@ export class DealsController {
     status: 404,
     description: 'Сделка не найдена',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
   patchDeal(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDealDto: UpdateDealDto,
@@ -164,6 +208,14 @@ export class DealsController {
     status: 404,
     description: 'Сделка не найдена',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
   deleteDeal(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<DeleteDealResponseDto> {
@@ -181,6 +233,14 @@ export class DealsController {
     status: 200,
     description: 'Сделка успешно повторена',
     type: RepeatDealResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Не авторизован - требуется JWT токен',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
   })
   repeatDeal(
     @Param('id', ParseIntPipe) id: number,

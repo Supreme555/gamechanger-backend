@@ -17,11 +17,23 @@ export default registerAs('app', () => {
   const bitrixBaseUrl = process.env.BITRIX_BASE_URL;
   const bitrixWebhook = process.env.BITRIX_WEBHOOK;
 
+  // JWT конфигурация
+  const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
+  const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+  const jwtAccessExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN ?? '15m';
+  const jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN ?? '7d';
+
   return {
     port,
     host,
     globalPrefix,
     corsOrigins,
+    jwt: {
+      accessSecret: jwtAccessSecret,
+      refreshSecret: jwtRefreshSecret,
+      accessExpiresIn: jwtAccessExpiresIn,
+      refreshExpiresIn: jwtRefreshExpiresIn,
+    },
     bitrix: {
       baseUrl: bitrixBaseUrl,
       webhook: bitrixWebhook,
