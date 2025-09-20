@@ -219,7 +219,7 @@ export class AuthController {
     description: 'Не авторизован - отсутствует или невалидный JWT токен',
   })
   async logout(@CurrentUser() user: CurrentUserData) {
-    return this.authService.logout(user.id);
+    return this.authService.logout(user.sub);
   }
 
   @Get('profile')
@@ -260,7 +260,7 @@ export class AuthController {
   })
   getProfile(@CurrentUser() user: CurrentUserData) {
     return {
-      id: user.id,
+      id: user.sub,
       email: user.email,
       role: user.role,
     };

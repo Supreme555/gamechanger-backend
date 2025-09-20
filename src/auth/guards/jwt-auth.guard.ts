@@ -46,7 +46,7 @@ export class JwtAuthGuard implements CanActivate {
 
       // Добавляем информацию о пользователе в request
       request.user = {
-        id: user.id,
+        sub: user.id,
         email: user.email!,
         role: user.role,
       };
