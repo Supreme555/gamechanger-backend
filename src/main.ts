@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 /**
  * Bootstraps the NestJS application.
@@ -27,6 +28,17 @@ async function bootstrap(): Promise<void> {
 
   const port = configService.get<number>('app.port') ?? 3000;
   const host = configService.get<string>('app.host') ?? 'localhost';
+
+  // Swagger
+  const swaggerTitle = 'GameChanger API';
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(swaggerTitle)
+    .setDescription('API documentation')
+    .setVersion('1.0.0')
+    .addTag('bitrix24')
+    .build();
+  const swaggerDoc = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(`${globalPrefix}/docs`, app, swaggerDoc);
   await app.listen(port, host);
 
   const appUrl = await app.getUrl();

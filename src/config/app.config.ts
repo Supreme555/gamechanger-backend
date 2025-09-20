@@ -13,10 +13,18 @@ export default registerAs('app', () => {
   const host = process.env.HOST ?? 'localhost';
   const globalPrefix = process.env.GLOBAL_PREFIX ?? 'api';
 
+  // Bitrix24 конфигурация
+  const bitrixBaseUrl = process.env.BITRIX_BASE_URL;
+  const bitrixWebhook = process.env.BITRIX_WEBHOOK;
+
   return {
     port,
     host,
     globalPrefix,
     corsOrigins,
+    bitrix: {
+      baseUrl: bitrixBaseUrl,
+      webhook: bitrixWebhook,
+    },
   };
 });
