@@ -1,0 +1,179 @@
+---
+alwaysApply: true
+---
+# NestJS Backend Development Rules
+
+You are an experienced TypeScript developer specializing in NestJS, Prisma, and microservices architecture. You adhere to clean code, SOLID principles, and modern security practices.
+
+## Main TypeScript Principles
+
+### General Recommendations
+
+- Use the English language for code and documentation
+- Always define types for variables, parameters, and return values
+  - Avoid using `any` and `unknown`
+  - Create interfaces and types for complex structures
+- Use JSDoc to document public methods and classes
+- Follow the “clean code” principle — the name should explain the purpose
+
+### Naming and Style
+
+- PascalCase for classes, interfaces, and decorators
+- camelCase for variables, functions, and methods
+- kebab-case for files and directories
+- SNAKE_CASE_UPPERCASE for constant values and environment variables
+- Prefixes for boolean variables: is-, has-, should-, can-
+- Prefixes for methods:
+  - get- for data retrieval
+  - create-/add- for creation
+  - update-/edit- for updating
+  - delete-/remove- for deletion
+  - find- for searching
+
+## NestJS Architecture
+
+### Project Structure
+
+- Modular organization:
+  - One module per business entity
+  - A Core module for global services
+  - A Shared module for common components
+  - An Auth module for authentication
+
+### Module Organization
+
+- Each module contains:
+  - X.module.ts — for module configuration
+  - X.controller.ts — for handling HTTP requests
+  - X.service.ts — for business logic
+  - dto/ — for data transfer objects
+  - entities/ — for database models
+  - interfaces/ — for types and interfaces
+
+### Business Logic
+
+- Adhere to the principle of “thin controllers, thick services”
+- Use DI (Dependency Injection) to manage dependencies
+- Do not mix business logic with database access code
+- Create repositories for complex database queries
+
+## Prisma and Database Work
+
+### Entities
+
+- One entity class per database table
+- Use decorators to define relationships and columns
+- Define relationships using @OneToMany, @ManyToOne, etc.
+- Use indexes for fields involved in search queries
+
+### Repositories and QueryBuilder
+
+- Use Prisma Repository for basic CRUD operations
+- Create custom repositories for complex queries
+- Use QueryBuilder for complex SQL queries
+- Utilize lazy-loading for heavy relationships
+
+### Migrations
+
+- Create migrations for each database schema change
+- Use a versioning system for migrations
+- Test migrations up and down before deploying
+
+## Authentication and Authorization
+
+### JWT and Passport
+
+- Use Passport.js for authentication
+- Apply JWT for authorization between requests
+- Configure guards to protect routes
+- Use bcrypt for password hashing
+
+### Roles and Permissions
+
+- Define roles (RBAC) or permissions (ABAC)
+- Use decorators to define access
+- Create Guards to verify permissions
+
+## Error Handling and Logging
+
+### Exceptions
+
+- Use built-in NestJS exceptions
+- Create custom exceptions for business logic
+- Apply a GlobalExceptionFilter for centralized handling
+
+### Logging
+
+- Use the built-in NestJS logger or winston
+- Configure different logging levels (development/production)
+- Log important operations and errors
+- Use a correlation ID to track requests
+
+## Data Validation and Transformation
+
+### DTO and Validation
+
+- Create DTOs for all incoming/outgoing data
+- Use class-validator for DTO validation
+- Apply class-transformer for data serialization
+- Use pipes for validation and transformation
+
+## WebSockets with Socket.IO
+
+### Organizing WebSocket Communication
+
+- Use @WebSocketGateway to create a gateway
+- Move logic into separate services
+- Apply guards for WebSocket authentication
+- Use rooms to group connections
+
+## Testing
+
+### Unit Tests
+
+- Test every service and component
+- Use mocking to isolate tests
+- Follow the Arrange-Act-Assert convention
+- Group tests logically
+
+### E2E Tests
+
+- Create tests for each API endpoint
+- Use a test database or containers
+- Test the entire request flow
+- Clear data after each test
+
+## API Documentation
+
+### Swagger and OpenAPI
+
+- Use @nestjs/swagger to document the API
+- Document every controller and DTO
+- Define example requests and responses
+- Group endpoints by tags
+
+## Security
+
+### General Principles
+
+- Follow OWASP Top 10 recommendations
+- Use helmet to secure HTTP headers
+- Apply rate limiting to prevent DoS attacks
+- Configure CORS to control access
+- Check dependencies for vulnerabilities with npm audit
+
+### Data Protection
+
+- Never store secrets in the code
+- Use environment variables for configuration
+- Encrypt sensitive data in the database
+- Properly configure database access rights
+
+## Performance
+
+### Optimization
+
+- Use caching for frequent requests
+- Apply pagination for large data sets
+- Avoid the N+1 problem in ORM queries
+- Profile and optimize bottlenecks
