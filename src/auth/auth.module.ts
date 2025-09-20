@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
+import { ContactsModule } from '../bitrix24/contacts/contacts.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthService } from './services/auth.service';
       }),
       inject: [ConfigService],
     }),
+    ContactsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

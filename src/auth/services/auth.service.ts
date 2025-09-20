@@ -3,6 +3,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -17,13 +18,17 @@ import {
   RefreshTokenDto,
   RefreshTokenResponseDto,
 } from '../dto';
+import { ContactsService } from '../../bitrix24/contacts/services/contacts.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly contactsService: ContactsService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -47,6 +52,14 @@ export class AuthService {
         email,
         passwordHash,
       },
+    });
+
+    // Создаем контакт в Bitrix24 (асинхронно, не блокируем регистрацию)
+    this.createBitrix24Contact(user).catch((error) => {
+      this.logger.error(
+        'Failed to create Bitrix24 contact during registration:',
+        error,
+      );
     });
 
     // Генерируем токены
@@ -291,5 +304,38 @@ export class AuthService {
       name: user.name || undefined,
       surname: user.surname || undefined,
     };
+  }
+
+  /**
+   * Создает контакт в Bitrix24 на основе данных пользователя
+   * @param user - данные пользователя из базы данных
+   */
+  private async createBitrix24Contact(user: User): Promise<void> {
+    try {
+      this.logger.log(`Creating Bitrix24 contact for user: ${user.email}`);
+
+      const contactResult = await this.contactsService.createContactFromUser({
+        name: user.name || undefined,
+        surname: user.surname || undefined,
+        email: user.email || '',
+        phone: user.phone || undefined,
+      });
+
+      if (contactResult.success) {
+        this.logger.log(
+          `Bitrix24 contact created successfully. Contact ID: ${contactResult.id}, User ID: ${user.id}`,
+        );
+      } else {
+        this.logger.warn(
+          `Failed to create Bitrix24 contact for user ${user.id}: ${contactResult.message}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error creating Bitrix24 contact for user ${user.id}:`,
+        error,
+      );
+      // Не прерываем процесс регистрации даже если создание контакта не удалось
+    }
   }
 }

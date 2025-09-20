@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DealsModule } from './bitrix24/deals/deals.module';
+import { Bitrix24Module } from './bitrix24/bitrix24.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -19,7 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     UsersModule,
-    DealsModule,
+    Bitrix24Module,
   ],
   controllers: [AppController],
   providers: [AppService],
