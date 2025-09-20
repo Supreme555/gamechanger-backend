@@ -13,3 +13,49 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Enum для ролей пользователей
+enum UserRole {
+  user
+  admin
+  manager
+}
+
+// Таблица пользователей
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phone         String?  @unique @db.VarChar(20)
+  email         String?  @unique @db.VarChar(255)
+  passwordHash  String   @map("password_hash") @db.Text
+  name          String?  @db.VarChar(100)
+  surname       String?  @db.VarChar(100)
+  address       String?  @db.Text
+  
+  role          UserRole @default(user)
+  isActive      Boolean  @default(true) @map("is_active")
+  
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Связи
+  authTokens    AuthToken[]
+
+  @@map("users")
+}
+
+// Таблица токенов аутентификации
+model AuthToken {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  
+  refreshToken String    @map("refresh_token") @db.Text
+  
+  expiresAt    DateTime  @map("expires_at") @db.Timestamp(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamp(6)
+
+  // Связи
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("auth_tokens")
+}
